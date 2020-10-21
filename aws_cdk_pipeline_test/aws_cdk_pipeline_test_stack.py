@@ -29,9 +29,7 @@ class AwsCdkPipelineTestStack(Stack):
         synth_action = SimpleSynthAction(
             cloud_assembly_artifact=cloud_assembly_artifact,
             source_artifact=source_artifact,
-            install_command="npm install -g aws-cdk && pip install pipenv",
-            build_command="pipenv sync --dev",
-            synth_command="pipenv run cdk synth",
+            synth_command="cdk synth",
         )
 
         # Define an AWS CodePipeline-based Pipeline to deploy CDK applications
