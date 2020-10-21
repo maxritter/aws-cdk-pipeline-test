@@ -9,25 +9,38 @@ class AwsCdkPipelineTestStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
+        # Output artifact
         source_artifact = codepipeline.Artifact()
+        # Artifact to hold the cloudAssemblyArtifact for the synth action (the template)
         cloud_assembly_artifact = codepipeline.Artifact()
 
-        pipeline = CdkPipeline(self, "Pipeline",
+        # Source
+        source_action=codepipeline_actions.GitHubSourceAction(
+            action_name="GitHub",
+            output=source_artifact,
+            oauth_token=SecretValue.secrets_manager("github-token"),
+            trigger=codepipeline_actions.GitHubTrigger.POLL,
+            # Replace these with your actual GitHub project info
+            owner="maxritter",
+            repo="aws-cdk-pipeline-test")
+
+
+        # Build (On synth)
+        synth_action = SimpleSynthAction(
+            cloud_assembly_artifact=cloud_assembly_artifact,
+            source_artifact=source_artifact,
+            install_command="npm install -g aws-cdk && pip install pipenv",
+            build_command="pipenv sync --dev",
+            synth_command="pipenv run cdk synth",
+        )
+
+        # Define an AWS CodePipeline-based Pipeline to deploy CDK applications
+        pipeline = CdkPipeline(
+            self,
+            "Pipeline",
             pipeline_name="MyAppPipeline",
             cloud_assembly_artifact=cloud_assembly_artifact,
-            source_action=codepipeline_actions.GitHubSourceAction(
-                action_name="GitHub",
-                output=source_artifact,
-                oauth_token=SecretValue.secrets_manager("github-token"),
-                trigger=codepipeline_actions.GitHubTrigger.POLL,
-                # Replace these with your actual GitHub project info
-                owner="maxritter",
-                repo="aws-cdk-pipeline-test"),
-            synth_action=SimpleSynthAction(
-                source_artifact=source_artifact,
-                cloud_assembly_artifact=cloud_assembly_artifact,
-                install_command="npm install -g aws-cdk",
-                build_command="mvn package",
-                synth_command="cdk synth"
-            )
+            source_action=source_action,
+            synth_action=synth_action,
         )
+        
