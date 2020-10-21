@@ -23,11 +23,11 @@ class AwsCdkPipelineTestStack(Stack):
                 # Replace these with your actual GitHub project info
                 owner="maxritter",
                 repo="aws-cdk-pipeline-test"),
-            synth_action=SimpleSynthAction.standard_npm_synth(
+            synth_action=SimpleSynthAction(
                 source_artifact=source_artifact,
                 cloud_assembly_artifact=cloud_assembly_artifact,
-                # Use this if you need a build step (if you're not using ts-node
-                # or if you have TypeScript Lambdas that need to be compiled).
-                build_command="npm run build"
+                install_command="npm install -g aws-cdk",
+                build_command="mvn package",
+                synth_command="cdk synth"
             )
         )
