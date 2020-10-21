@@ -29,6 +29,7 @@ class AwsCdkPipelineTestStack(Stack):
         synth_action = SimpleSynthAction(
             cloud_assembly_artifact=cloud_assembly_artifact,
             source_artifact=source_artifact,
+            install_command="pipenv lock",
             synth_command="cdk synth",
         )
 
