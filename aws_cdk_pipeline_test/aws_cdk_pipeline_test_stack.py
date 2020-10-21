@@ -18,7 +18,7 @@ class AwsCdkPipelineTestStack(Stack):
             source_action=codepipeline_actions.GitHubSourceAction(
                 action_name="GitHub",
                 output=source_artifact,
-                oauth_token=SecretValue.secrets_manager("GITHUB_TOKEN_NAME"),
+                oauth_token=SecretValue.secrets_manager("github-token"),
                 trigger=codepipeline_actions.GitHubTrigger.POLL,
                 # Replace these with your actual GitHub project info
                 owner="maxritter",
