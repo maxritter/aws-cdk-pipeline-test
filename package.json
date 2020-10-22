@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/maxritter/aws-cdk-pipeline-test#readme",
   "dependencies": {
-        "aws-cdk": ">=1.69.0",
+        "aws-cdk": ">=1.69.0"
     }
 }

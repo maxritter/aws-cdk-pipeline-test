@@ -1,46 +1,24 @@
-from aws_cdk.core import Stack, StackProps, Construct, SecretValue
-from aws_cdk.pipelines import CdkPipeline, SimpleSynthAction
+from aws_cdk import core
+from os import path
 
-import aws_cdk.aws_codepipeline as codepipeline
-import aws_cdk.aws_codepipeline_actions as codepipeline_actions
+import aws_cdk.aws_lambda as lmb
+import aws_cdk.aws_apigateway as apigw
 
-class AwsCdkPipelineTestStack(Stack):
+class AwsCdkPipelineTestStack(core.Stack):
 
-    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # Output artifact
-        source_artifact = codepipeline.Artifact()
-        # Artifact to hold the cloudAssemblyArtifact for the synth action (the template)
-        cloud_assembly_artifact = codepipeline.Artifact()
+        this_dir = path.dirname(__file__)
 
-        # Source
-        source_action=codepipeline_actions.GitHubSourceAction(
-            action_name="GitHub",
-            output=source_artifact,
-            oauth_token=SecretValue.secrets_manager("github-token"),
-            trigger=codepipeline_actions.GitHubTrigger.POLL,
-            # Replace these with your actual GitHub project info
-            owner="maxritter",
-            repo="aws-cdk-pipeline-test")
+        handler = lmb.Function(self, 'Handler',
+            runtime=lmb.Runtime.PYTHON_3_8,
+            handler='handler.handler',
+            code=lmb.Code.from_asset(path.join(this_dir, 'lambda')))
 
+        gw = apigw.LambdaRestApi(self, 'Gateway',
+            description='Endpoint for a simple Lambda-powered web service',
+            handler=handler.current_version)
 
-        # Build (On synth)
-        synth_action = SimpleSynthAction(
-            cloud_assembly_artifact=cloud_assembly_artifact,
-            source_artifact=source_artifact,
-            install_command="pipenv lock",
-            build_command="",
-            synth_command="cdk synth",
-        )
-
-        # Define an AWS CodePipeline-based Pipeline to deploy CDK applications
-        pipeline = CdkPipeline(
-            self,
-            "Pipeline",
-            pipeline_name="MyAppPipeline",
-            cloud_assembly_artifact=cloud_assembly_artifact,
-            source_action=source_action,
-            synth_action=synth_action,
-        )
-        
+        self.url_output = core.CfnOutput(self, 'Url',
+            value=gw.url)
