@@ -4,7 +4,8 @@ from aws_cdk import aws_codepipeline_actions as cpactions
 from aws_cdk import pipelines
 from .webservice_stage import WebServiceStage
 
-APP_ACCOUNT = '298767276755'
+APP_ACCOUNT_DEV = '298767276755'
+APP_ACCOUNT_PROD = '614027750584'
 
 class PipelineStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs):
@@ -32,8 +33,16 @@ class PipelineStack(core.Stack):
                 synth_command='cdk synth'))
 
         pre_prod_app = WebServiceStage(self, 'Pre-Prod', env={
-            'account': APP_ACCOUNT,
+            'account': APP_ACCOUNT_DEV,
             'region': 'eu-central-1',
         })
-
         pre_prod_stage = pipeline.add_application_stage(pre_prod_app)
+        pre_prod_stage.add_manual_approval_action(
+            action_name='PromoteToProd'
+        )
+
+        prod_app = WebServiceStage(self, 'Prod', env={
+            'account': APP_ACCOUNT_PROD,
+            'region': 'eu-central-1',
+        })
+        prod_stage = pipeline.add_application_stage(prod_app)
