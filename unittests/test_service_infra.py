@@ -1,6 +1,6 @@
 from aws_cdk import core
 
-from aws_cdk_pipeline_test_stack import AwsCdkPipelineTestStack
+from aws_cdk_pipeline_test.aws_cdk_pipeline_test_stack import AwsCdkPipelineTestStack
 
 def test_lambda_handler():
     # GIVEN
