@@ -4,8 +4,8 @@ from aws_cdk import aws_codepipeline_actions as cpactions
 from aws_cdk import pipelines
 from .webservice_stage import WebServiceStage
 
-APP_ACCOUNT_DEV = '298767276755'
-APP_ACCOUNT_PROD = '614027750584'
+APP_ACCOUNT_DEV = '830312518273'
+APP_ACCOUNT_PROD = '589348632636'
 
 class PipelineStack(core.Stack):
     def __init__(self, scope: core.Construct, id: str, **kwargs):
